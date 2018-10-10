@@ -1,20 +1,26 @@
-.Author {
+.Creator {
   margin-top: -50px;
   margin-bottom: 25px;
 }
 
-.Author-Image {
+.Creator-Image {
   height: 30px !important;
   width: 30px !important;
 }
 
-.Author-Text {
+.Creator-Text {
   font-size: 16px;
   font-weight: bold;
 }
 
 .Body-Text {
-  padding: 25px 0px 200px 0px;
+  font-size: 20px;
+}
+
+@media (max-width: 623px) {
+  .Body-Text {
+    font-size: 16px;
+  }
 }
 
 .Date {
@@ -32,8 +38,15 @@
   padding-left: 3px;
 }
 
+.Lightbox {
+  position: absolute;
+  top: 50%;
+  margin-top: -100px;
+  height: 200px;
+}
+
 .Template {
-  padding: 25px;
+  padding: 25px 0px 200px 0px;
 }
 
 .Title-Text {

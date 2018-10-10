@@ -4,14 +4,15 @@ import zupage from "zupage";
 import Gallery from "react-photo-gallery";
 import Lightbox from "react-images";
 import { Container, Image } from "semantic-ui-react";
+import Linkify from "react-linkify";
 
 class App extends Component {
   state = {
-    author: {},
+    creator: {},
+    body: "",
     colorPalette: [],
     currentImage: 0,
-    images: [],
-    paragraphs: [],
+    photos: [],
     title: ""
   };
   async componentDidMount() {
@@ -21,38 +22,33 @@ class App extends Component {
       postResponse.published_time * 1000
     ).toLocaleDateString("en-US");
 
+    const body = postResponse.body.slice(postResponse.title.length);
+
     this.setState({
-      author: postResponse.creator,
+      body: body,
+      creator: postResponse.creator,
       colorPalette: postResponse.page.color_palette,
       date: date,
-      images: postResponse.images,
-      paragraphs: this.paragraphs(postResponse),
+      photos: this.formatPhotos(postResponse.images),
       title: postResponse.title
     });
   }
 
-  paragraphs = post => {
-    if (post.body) {
-      var body = post.body;
-      body = body.substr(post.title.length, body.length);
-      body = body.trim();
-      return body.match(/[^\r\n]+/g);
-    }
-    return [];
-  };
-
-  photos = () => {
-    const { images } = this.state;
-
+  formatPhotos = images => {
     let photoArray = [];
+
+    let index = 0;
 
     images.forEach(function(image) {
       photoArray.push({
+        id: image.id,
+        index: index,
         caption: image.caption,
         src: image.url,
         width: image.width,
         height: image.height
       });
+      index++;
     });
 
     return photoArray;
@@ -84,55 +80,64 @@ class App extends Component {
     });
   };
 
-  renderAuthor = () => {
-    const { author, date } = this.state;
+  renderCreator = () => {
+    const { creator, date } = this.state;
     return (
-      <div className="Author">
-        <Image className="Author-Image" src={author.profile_image_url} avatar />
-        <span className="Author-Text">{author.name}</span>
+      <div className="Creator">
+        <Image
+          className="Creator-Image"
+          src={creator.profile_image_url}
+          avatar
+        />
+        <span className="Creator-Text">{creator.name}</span>
         <p className="Date">{date}</p>
       </div>
     );
   };
 
   renderParagraphs = () => {
-    const { paragraphs } = this.state;
-
-    return paragraphs.map((paragraph, i) => {
-      if (i === 0) {
-        const firstLetter = paragraph.charAt(0);
-        const p = paragraph.substr(1, paragraph.length);
-        return (
-          <p key={i}>
-            <span className="First-Character">{firstLetter}</span>
-            {p}
-          </p>
-        );
-      }
-      return <p key={i}>{paragraph}</p>;
-    });
+    const { body } = this.state;
+    let paragraphs = body.match(/[^\r\n]+/g);
+    if (paragraphs) {
+      return paragraphs.map((paragraph, i) => {
+        if (i === 0) {
+          const firstLetter = paragraph.charAt(0);
+          const p = paragraph.substr(1, paragraph.length);
+          return (
+            <p key={i}>
+              <span className="First-Character">{firstLetter}</span>
+              {p}
+            </p>
+          );
+        }
+        return <p key={i}>{paragraph}</p>;
+      });
+    }
+    return <p />;
   };
 
   render() {
-    const { title } = this.state;
+    const { title, photos } = this.state;
     return (
       <div className="Template">
         <Container text>
           <div className="Title-Text">
             <p>{title}</p>
-            {this.renderAuthor()}
+            {this.renderCreator()}
           </div>
-          <Gallery photos={this.photos()} onClick={this.openLightbox} />
-          <Lightbox
-            images={this.photos()}
-            onClose={this.closeLightbox}
-            onClickPrev={this.gotoPrevious}
-            onClickNext={this.gotoNext}
-            currentImage={this.state.currentImage}
-            isOpen={this.state.lightboxIsOpen}
-          />
-          <div className="Body-Text">{this.renderParagraphs()}</div>
+          <Gallery photos={photos} onClick={this.openLightbox} />
+          <br />
+          <Linkify className="Body-Text">{this.renderParagraphs()}</Linkify>
         </Container>
+        <Lightbox
+          className="Lightbox"
+          images={photos}
+          onClose={this.closeLightbox}
+          onClickPrev={this.gotoPrevious}
+          onClickNext={this.gotoNext}
+          currentImage={this.state.currentImage}
+          isOpen={this.state.lightboxIsOpen}
+        />
       </div>
     );
   }
