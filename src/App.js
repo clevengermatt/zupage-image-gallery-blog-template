@@ -22,7 +22,11 @@ class App extends Component {
       postResponse.published_time * 1000
     ).toLocaleDateString("en-US");
 
-    const body = postResponse.body.slice(postResponse.title.length);
+    const body = "";
+
+    if (postResponse.title) {
+      body = postResponse.body.slice(postResponse.title.length);
+    }
 
     this.setState({
       body: body,
